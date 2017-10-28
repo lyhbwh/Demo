@@ -22,4 +22,22 @@ node {
                 throw e
             }
         }
+    stage('SonarQube analysis') {
+            try{
+                def sonarqubeScannerHome = tool name:'SonarScannerTest'
+                    withSonarQubeEnv('SonarSeverTest') {
+                        sh "${sonarqubeScannerHome}/bin/sonar-scanner"
+                    }
+                
+                timeout(4) {
+                   def qg = waitForQualityGate() 
+                       if (qg.status != 'OK') {
+                           error "It doesn't pass Sonarqube scanner gate setting，Please fix it！failure: ${qg.status}"
+                       }
+                    }
+            }catch(e){
+                echo "SonarQube failed"
+                throw e
+            }
+        }
 }
